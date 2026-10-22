@@ -18,12 +18,19 @@ jobs:
         with:
           go-version: '1.22'
           cache: false
-      - name: Build
+      - name: Build APK
         run: |
-          chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
-      - name: Upload
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --no-daemon
+          else
+            chmod +x ./V2rayNG/gradlew
+            cd ./V2rayNG
+            ./gradlew assembleDebug --no-daemon
+          fi
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remi-VPN-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            **/app/build/outputs/apk/debug/*.apk
