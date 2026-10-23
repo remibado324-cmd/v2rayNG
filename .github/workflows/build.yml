@@ -1,19 +1,16 @@
-name: Build Remi VPN APK
+name: Remi VPN APK
 on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Go 1.22
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-go@v5
         with:
           go-version: '1.22'
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+          
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -23,16 +20,20 @@ jobs:
           go install golang.org/x/mobile/cmd/gomobile@latest
           go install golang.org/x/mobile/cmd/gobind@latest
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          export PATH=$PATH:$(go env GOPATH)/bin
-          gomobile init
+          $HOME/go/bin/gomobile init
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Rendre gradlew executable
+        run: |
+          find . -name "gradlew" -type f -exec chmod +x {} \;
+          find . -name "gradlew" -type f
 
-      - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Générer un APK
+        run: |
+          GRADLE=$(find . -name "gradlew" -type f | head -n 1)
+          echo "Je build avec: $GRADLE"
+          $GRADLE assembleDebug --stacktrace
 
-      - name: Upload APK
+      - name: Téléverser un APK
         uses: actions/upload-artifact@v4
         with:
           name: Remi-VPN-APK
